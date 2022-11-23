@@ -1,5 +1,7 @@
 #include "keyrec.h"
 
+#include <unistd.h>
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -45,15 +47,21 @@ int main(int argc, const char *argv[]) {
 		logfileLocation = argv[1];
 	}
 
-	// Open the logfile.
-	ctx.logfile = fopen(logfileLocation, "w");
+	bool notExist;
+	if (access(logfileLocation, F_OK) != 0) {
+		notExist = true;
+	}
 
+	// Open the logfile.
+	ctx.logfile = fopen(logfileLocation, "a");
 	if (!ctx.logfile) {
 		fprintf(stderr, "ERROR: Unable to open log file. "
 				"Ensure that you have the proper permissions.\n");
 		exit(1);
 	}
-	fprintf(ctx.logfile, "sec\tmsec\tup/down\tkey\n");
+	if (notExist) {
+		fprintf(ctx.logfile, "sec\tmsec\tup/down\tkey\n");
+	}
 
 	// Display the location of the logfile and start the loop.
 	printf("Logging to: %s\n", logfileLocation);
